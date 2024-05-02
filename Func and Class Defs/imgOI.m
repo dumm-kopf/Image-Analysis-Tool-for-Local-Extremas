@@ -8,6 +8,7 @@ classdef imgOI
         ROIList
         Peaks
         regProps
+        PeakStats
     end
 
     methods
@@ -27,15 +28,6 @@ classdef imgOI
                 obj.Yaxis = imgStruct.Yaxis;
             end
 
-            % Load or create binary mask
-            % try % try loading exisiting mask file
-            %     obj.reg_props = obj.loadProps;
-            % catch % if not then run binarize
-            %     obj.reg_props = obj.updateRegProps;   
-            % end
-            
-            % Fill ROIList
-            % obj.ROIList = obj.fillROIList;
 
         end
 
@@ -73,6 +65,9 @@ classdef imgOI
 
                 a = obj.regProps(ii).WeightedCentroid;
                 b = ceil(obj.regProps(ii).EquivDiameter);
+                if b < 8
+                    b = 8;
+                end
 
                 size = length(obj.Data);
 
@@ -147,41 +142,47 @@ classdef imgOI
 
         end
 
-        function param = getParam(obj, roiID, paramID)
+        function paramTable = getParam(obj, roiID)
 
             arguments
                 obj
                 roiID = [1:length(obj.ROIList)];
-                paramID = [1:5];
             end
 
             if roiID == 'a'
                 roiID = 1:length(obj.ROIList);
             end
-            if paramID == 'a'
-                paramID = 1:5;
-            end
 
-            param(numel(roiID), numel(paramID) + 1) = zeros;
+            param(numel(roiID), 6) = zeros;
 
             jj = 1;
 
             for ii = roiID
 
-                param(jj, paramID) = obj.ROIList(ii).fit_param(1, paramID);
-                param(jj, end) = ii;
+                param(jj, 1) = ii;
+                param(jj, 2:6) = obj.ROIList(ii).fit_param(1, 1:5);
+                param(jj, 5) = obj.ROIList(ii).fit_param(1, 4) / 16;
+                
                 jj = jj + 1;
                 if obj.ROIList(ii).fit_param(2, 1) > 1
                     try 
-                        param(jj, paramID) = obj.ROIList(ii).fit_param(2, paramID);
+                        param(jj, 1) = ii;
+                        param(jj, 2:6) = obj.ROIList(ii).fit_param(2, 1:5);
+                        param(jj, 5) = obj.ROIList(ii).fit_param(2, 4) / 16;
                         param(jj, end) = ii;
                         jj = jj + 1;
                     catch
                     end
                 end
-                
-
+               
             end
+
+            param(:, 7) = param(:, 2) - param(:, 5);
+
+            labels = ["roiID", "Intensity", "X", "Y", "Width", "Background", "Adjusted Intensity"];
+            paramTable = array2table(param, "VariableNames", labels);
+            
+
         end
 
         function saveObj(obj)
@@ -189,7 +190,6 @@ classdef imgOI
             save(strcat(obj.FileName, '_obj'), "obj")
 
         end
-
 
     end
 

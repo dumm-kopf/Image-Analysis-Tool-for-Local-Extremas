@@ -7,6 +7,7 @@ classdef ROI
     end
 
     methods 
+        
         function obj = ROI(bounds, reg_data) 
 
             if nargin > 0
@@ -33,6 +34,12 @@ classdef ROI
                 fit_params(2:3) = obj.shift(fit_params(2), fit_params(3));
                 fit_params(7:8) = obj.shift(fit_params(6), fit_params(7));
 
+                fit_params(1) = fit_params(1) * fit_params(4) * sqrt(2*pi);
+                fit_params(6) = fit_params(6) * fit_params(9) * sqrt(2*pi);
+
+                fit_params(4) = 2*sqrt(2*log(2))*fit_params(4);
+                fit_params(9) = 2*sqrt(2*log(2))*fit_params(9);
+
                 
                 obj.fit_param(1, 1:5) = fit_params(1:5);
                 obj.fit_param(2, 1:5) = fit_params(6:10);
@@ -41,28 +48,6 @@ classdef ROI
 
 
         end
-
-        % function real_peaks = getRealPeaks(obj)
-        % 
-        %     n = length(obj.peaks)/2;
-        % 
-        %     real_peaks = zeros(n, 2);
-        % 
-        %     if isempty(obj.peaks)
-        %         real_peaks = [0, 0];
-        % 
-        %     else
-        %         for ii = 1:1:n
-        % 
-        %             % coordinate of each peak ROI
-        %             x = obj.bounds(1) + obj.peaks(2*ii - 1) - 1;
-        %             y = obj.bounds(2) + obj.peaks(2*ii) - 1;
-        %             real_peaks(ii, 1) = x;
-        %             real_peaks(ii, 2) = y;
-        % 
-        %         end
-        %     end
-        % end
 
         function [xx, yy] = shift(obj, x, y)
 

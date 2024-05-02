@@ -32,9 +32,10 @@ function [fittedData, pFit] = twoGauss2D(raw_data, NameValueArgs)
     end
 
     % Initial guess for parameters: [Amplitude, x0, y0, Sigma, floor]
-    initialGuess1 = [raw_data(coord(1),coord(2)), x(1, coord(1)), y(coord(2), 2), 5, min(min(raw_data))];
+    initialGuess1 = [raw_data(coord(1),coord(2)), x(1, coord(1)), y(coord(2), 2), std(x(:)), min(min(raw_data))];
+
     % if there is only one peak, set second peak to be zero
-    try initialGuess2 = [raw_data(coord(3), coord(4)), x(1, coord(3)), y(coord(4), 1), 5, min(min(raw_data))];
+    try initialGuess2 = [raw_data(coord(3), coord(4)), x(1, coord(3)), y(coord(4), 1), std(x(:)), min(min(raw_data))];
     catch initialGuess2 = [0, 0, 0, 0, 0];
     end
     % for ii = 1:1:length(NameValueArgs.GuessParam1)
